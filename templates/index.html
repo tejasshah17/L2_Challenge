@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title> Home | Best Buy Challenge</title>
+    <link rel="icon" type="image/png" href="{{url_for('static',filename='images/l2_icon.png')}}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"/>
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
+          integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">-->
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/jquery-ui.css') }}">
+    <style>
+    .ui-widget-header .ui-icon {
+        background-image: url({{url_for('static',filename='images/ui-icons_444444_256x240.png')}});
+    }
+    .search-box{
+        margin: 20px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        background : #eee;
+        box-shadow: 3px 5px 7px #ccc;
+    }
+    .card{
+        border:1px solid #ddd ;
+    }
+    .card-footer{
+        text-align:center;
+    }
+
+
+    </style>
+
+</head>
+<body>
+
+<nav class="navbar navbar-inverse bg-inverse ">
+    <a class="navbar-brand" href="index.html">
+        <img src="{{ url_for('static',filename='l2_logo.png')}}" width="30" height="30" class="d-inline-block align-top"
+             alt="L2 Inc Logo">
+        Best Buy Challenge
+    </a>
+</nav>
+
+
+<div class="search-box">
+    <form class="form-inline" method="Post" name="myForm" onsubmit="return(validateForm());">
+        <div class="btn-group" data-toggle="buttons" style="margin-right:10px">
+            <label id="lbl_STV" class="btn btn-outline-primary">
+                <input type="radio" name="search_type" id="rad_STV" autocomplete="off" value="STV"> Smart TV
+            </label>
+            <label id="lbl_CSTV" class="btn btn-outline-primary">
+                <input type="radio" name="search_type" id="rad_CSTV" autocomplete="off" value="CSTV"> Curved Smart TV
+            </label>
+        </div>
+
+        <label class="sr-only" for="startDate">Start Date</label>
+        <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+            <div class="input-group-addon">Start Date</div>
+            <input type="text" name="startDate" class="form-control mb-2 mr-sm-2 mb-sm-0" id="startDate"
+                   placeholder="mm/dd/yyyy" value="{{start_date}}" data-toggle="tooltip"
+                   title="Please enter a Start Date!" data-placement="top">
+        </div>
+
+        <label class="sr-only" for="endDate">End Date</label>
+        <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+            <div class="input-group-addon">End Date</div>
+            <input type="text" name="endDate" class="form-control mb-2 mr-sm-2 mb-sm-0" id="endDate"
+                   placeholder="mm/dd/yyyy" value="{{end_date}}" data-toggle="tooltip" title="Please enter a End Date!">
+        </div>
+
+        <button type="submit" class="btn btn-success">Submit</button>
+    </form>
+</div>
+
+{% if start_date and end_date and not brand_percent and not top3 and not volatility and not correlation %}
+<div class="jumbotron">
+    <h1 class="display-3">No Data to Show!</h1>
+    <p class="lead">For Date-Range : {{start_date}} to {{end_date}}</p>
+    <p>in {% if search_type == "STV" %} Smart TVs {% else %} Curved Smart TVs {% endif %}</p>
+    <hr class="my-4">
+    <p>Please try some other search parameters from above !!</p>
+</div>
+{% endif %}
+<div class="row" style="margin:20px;padding:10px">
+    <div class="col-sm-12 col-md-6">
+        {% if brand_percent %}
+        <h5 style="min-height:45px">Percentage of Brand in {% if search_type== "CSTV"%} Curved Smart TVs {% else %}
+            Smart TVs {% endif %} </h5>
+        <table class="table table-hover table-inverse">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Brand Name</th>
+                <th>No. of Products ({{brand_percent.count|length}})</th>
+                <th>%</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for i in range(brand_percent.count|length) %}
+            <tr>
+                <th scope="row">{{i+1}}</th>
+                <td>{{brand_percent.manufacturer[i].decode('utf-8')}}</td>
+                <td>{{brand_percent.count[i]}}</td>
+                <td>{{brand_percent.percent[i]}}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+
+    <div class="col-sm-12 col-md-6">
+        {% if top3 %}
+        <h5 style="min-height:45px">Percentage of Top 3 result owned by Brand in {% if search_type== "CSTV"%} Curved
+            Smart TVs {% else %} Smart
+            TVs {% endif %} </h5>
+        <table class="table table-hover table-inverse">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Brand Name</th>
+                <th>No. of Products ({{top3.count|length}})</th>
+                <th>%</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for i in range(top3.count|length) %}
+            <tr>
+                <th scope="row">{{i+1}}</th>
+                <td>{{top3.manufacturer[i].decode('utf-8')}}</td>
+                <td>{{top3.count[i]}}</td>
+                <td>{{top3.percent[i]}}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+    </div>
+</div>
+
+<div class="row" style="margin:20px;padding:10px">
+    {% if correlation %}
+    <div class="col-sm-12 col-md-6">
+        <h5>Correlation between No.of Review and Search Rank</h5>
+        <div class="row">
+            <div class="col-sm-12 col-md-6">
+                <div class="card ">
+                    <div class="card-block text-center">
+                        <h1 class="card-title">{{correlation.reviewCount[0]}}</h1>
+                    </div>
+                    <div class="card-footer bg-info">
+                        Sales Rank Short Term
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <div class="card ">
+                    <div class="card-block text-center">
+                        <h1 class="card-title">{{correlation.reviewCount[1]}}</h1>
+                    </div>
+                    <div class="card-footer bg-info">
+                        Sales Rank Medium Term
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+            <div class="col-sm-12 col-md-6">
+                <div class="card ">
+                    <div class="card-block text-center">
+                        <h1 class="card-title">{{correlation.reviewCount[2]}}</h1>
+                    </div>
+                    <div class="card-footer bg-info">
+                        Sales Rank Long Term
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <div class="card ">
+                    <div class="card-block text-center">
+                        <h1 class="card-title">{{correlation.reviewCount[3]}}</h1>
+                    </div>
+                    <div class="card-footer bg-info">
+                        Best Selling Rank
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-sm-12 col-md-6">
+        <h5>Correlation between Rating and Search Rank</h5>
+        <div class="row">
+            <div class="col-sm-12 col-md-6">
+                <div class="card ">
+                    <div class="card-block text-center">
+                        <h1 class="card-title">{{correlation.reviewAvg[0]}}</h1>
+                    </div>
+                    <div class="card-footer bg-warning">
+                        Sales Rank Short Term
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <div class="card ">
+                    <div class="card-block text-center">
+                        <h1 class="card-title">{{correlation.reviewAvg[1]}}</h1>
+                    </div>
+                    <div class="card-footer bg-warning">
+                        Sales Rank Medium Term
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+            <div class="col-sm-12 col-md-6">
+                <div class="card ">
+                    <div class="card-block text-center">
+                        <h1 class="card-title">{{correlation.reviewAvg[2]}}</h1>
+                    </div>
+                    <div class="card-footer bg-warning">
+                        Sales Rank Long Term
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <div class="card ">
+                    <div class="card-block text-center">
+                        <h1 class="card-title">{{correlation.reviewAvg[3]}}</h1>
+                    </div>
+                    <div class="card-footer bg-warning">
+                        Best Selling Rank
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% endif %}
+</div>
+
+
+<div class="row" style="margin:20px;padding:10px">
+    <div class="col-sm-12">
+
+        {% if volatility %}
+
+        <h5>Volatility of Products {% if search_type== "CSTV"%} Curved Smart TVs {% else %} Smart TVs {% endif %} </h5>
+        <table class="table table-hover table-inverse">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Brand Name</th>
+                <th>Sales Rank Short Term</th>
+                <th>Sales Rank Medium Term</th>
+                <th>Sales Rank Long Term</th>
+                <th>Best Selling Rank</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!--{% for i in range(volatility.sku|length) %}
+            <tr>
+                <th scope="row">{{i+1}}</th>
+                <td>{{volatility.manufacturer[i].decode('utf-8')}}</td>
+                <td>{{volatility.sku[i]}}</td>
+                <td>{{volatility.salesRankShortTerm[i]}}</td>
+                <td>{{volatility.salesRankMediumTerm[i]}}</td>
+                <td>{{volatility.salesRankLongTerm[i]}}</td>
+                <td>{{volatility.bestSellingRank[i]}}</td>
+            </tr>
+            {% endfor %} -->
+            {% for key,value in volatility.items() %}
+            <tr>
+                <th scope="row">{{loop.index}}</th>
+                <td>{{key.decode('utf-8')}}</td>
+                <td>{{value[1]}}</td>
+                <td>{{value[2]}}</td>
+                <td>{{value[3]}}</td>
+                <td>{{value[4]}}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
+        integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"
+        integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
+        crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+        crossorigin="anonymous"></script>
+<script>
+  $(document).ready(function() {
+    $( "#startDate" ).datepicker({
+      showButtonPanel: true,
+      maxDate: '0',
+      onSelect: function(date){
+
+        $("#endDate").datepicker( "option", {minDate : new Date(date)} );
+
+    }
+    });
+    $( "#endDate" ).datepicker({
+      maxDate: '0'
+    });
+    {% if search_type == "STV" %}
+        $('#lbl_CSTV').removeClass('active');
+        $('#lbl_STV').addClass('active');
+        $('#rad_STV').prop("checked",true);
+    {% elif search_type == "CSTV" %}
+        $('#lbl_STV').removeClass('active');
+        $('#lbl_CSTV').addClass('active');
+        $('#rad_CSTV').prop("checked",true);
+    {% endif %}
+
+
+  } );
+
+
+</script>
+<script type="text/javascript">
+    function validateForm(){
+    debugger;
+
+        if (!$("input[name='search_type']:checked").val()) {
+           alert('Please Select the Smart TV / Curved Smart TV from Option');
+           return false;
+        }
+
+        if( $('#startDate').val() == "" )
+         {
+            alert('Please enter the Start Date');
+            return false;
+         }
+
+         if( $('#endDate').val() == "" )
+         {
+            alert('Please enter the End Date');
+            return false;
+         }
+        return true;
+    }
+
+</script>
+</body>
+</html>

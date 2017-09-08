@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>404 | Best Buy Challenge</title>
+    <link rel="icon" type="image/png" href="{{url_for('static',filename='images/l2_icon.png')}}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"/>
+
+</head>
+<body>
+<nav class="navbar navbar-inverse bg-inverse ">
+    <a class="navbar-brand" href="index.html">
+        <img src="{{ url_for('static',filename='l2_logo.png')}}" width="30" height="30" class="d-inline-block align-top"
+             alt="L2 Inc Logo">
+        Best Buy Challenge
+    </a>
+</nav>
+<div class="jumbotron">
+  <h1 class="display-3">404 , Something went wrong!</h1>
+  <p class="lead">This has been reported to technical team, it shall be soon fixed !!</p>
+    <p class="lead">
+    <a class="btn btn-primary btn-lg" href="/" role="button">Home</a>
+  </p>
+  <hr class="my-4">
+  <p>{{error_code}}</p>
+
+</div>
+</body>
+</html>
