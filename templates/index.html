@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"/>
     <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
           integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">-->
-    <link rel="stylesheet" href="{{ url_for('static',filename='css/jquery-ui.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/jquery-ui.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/jquery-ui.theme.css') }}"/>
     <style>
     .ui-widget-header .ui-icon {
         background-image: url({{url_for('static',filename='images/ui-icons_444444_256x240.png')}});
@@ -92,20 +93,31 @@
             <tr>
                 <th>#</th>
                 <th>Brand Name</th>
-                <th>No. of Products ({{brand_percent.count|length}})</th>
+                <th>No. of Products </th>
                 <th>%</th>
             </tr>
             </thead>
             <tbody>
+            {% set num_products = 0 %}
             {% for i in range(brand_percent.count|length) %}
             <tr>
                 <th scope="row">{{i+1}}</th>
                 <td>{{brand_percent.manufacturer[i].decode('utf-8')}}</td>
-                <td>{{brand_percent.count[i]}}</td>
+                <td>{{brand_percent.count[i]}} </td>
                 <td>{{brand_percent.percent[i]}}</td>
             </tr>
+            {% set num_products = num_products + brand_percent.count[i] %}
+            {% if (i+1) == brand_percent.count|length %}
+            <tr>
+                <th colspan="2">Total</th>
+                <td>{{num_products}}</td>
+                <td>100</td>
+            </tr>
+            {% endif %}
             {% endfor %}
+
             </tbody>
+
         </table>
         {% endif %}
     </div>
@@ -120,11 +132,12 @@
             <tr>
                 <th>#</th>
                 <th>Brand Name</th>
-                <th>No. of Products ({{top3.count|length}})</th>
+                <th>No. of Products </th>
                 <th>%</th>
             </tr>
             </thead>
             <tbody>
+            {% set num_products = 0 %}
             {% for i in range(top3.count|length) %}
             <tr>
                 <th scope="row">{{i+1}}</th>
@@ -132,6 +145,14 @@
                 <td>{{top3.count[i]}}</td>
                 <td>{{top3.percent[i]}}</td>
             </tr>
+            {% set num_products = num_products + top3.count[i] %}
+            {% if (i+1) == top3.count|length %}
+            <tr>
+                <th colspan="2">Total</th>
+                <td>{{num_products}}</td>
+                <td>100</td>
+            </tr>
+            {% endif %}
             {% endfor %}
             </tbody>
         </table>
@@ -314,7 +335,8 @@
     }
     });
     $( "#endDate" ).datepicker({
-      maxDate: '0'
+      maxDate: '0',
+      showButtonPanel:true
     });
     {% if search_type == "STV" %}
         $('#lbl_CSTV').removeClass('active');
@@ -343,6 +365,7 @@
         if( $('#startDate').val() == "" )
          {
             alert('Please enter the Start Date');
+
             return false;
          }
 

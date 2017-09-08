@@ -11,6 +11,7 @@ def index():
 		if request.method == 'GET':
 			return render_template('index.html')
 		else:
+			#If the search has been requested it would be POST request, fetch the parameters from request and call getData()
 			start_date = request.form['startDate']
 			end_date = request.form['endDate']
 			search_type = request.form['search_type']
@@ -26,6 +27,7 @@ def index():
 
 if __name__ == '__main__':
 	try:
+		###### --- CHECK IF DATA DIRECTORY EXISTS, IF NOT THEN CREATE --- #####
 		init()
 		app.run()
 

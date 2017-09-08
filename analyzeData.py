@@ -5,16 +5,23 @@ import os
 
 def getData(search_type, start_date, end_date):
 	try:
+		#get the list of all dates between the start date and end date
 		dateList = list(pd.date_range(start_date, end_date, freq='D'))
+
+		#create empty dataframe to merge dataframe of all dates into one
 		df_result = pd.DataFrame()
+
+		#create seperate dataframe for top3 results
 		df_top3 = pd.DataFrame()
 		for date in dateList:
 			fileName = "{}_CSV_{}.csv".format(search_type, pd.datetime.strftime(date, '%Y_%m_%d'))
 			filePath = os.path.join(fl.csv_data_path, fileName)
 			if os.path.exists(filePath):
+				#if the csv file for particular date exists then read the file into dataframe and append it
 				fileContent = pd.read_csv(filePath)
 				df_top3 = df_top3.append(fileContent.head(3))
 				df_result = df_result.append(fileContent)
+
 
 		if not df_top3.empty:
 			result_top3 = getBrandPercent(df_top3, "top3")
@@ -25,6 +32,7 @@ def getData(search_type, start_date, end_date):
 			result_correlation = getReviewCorrelation(df_result)
 			result_volatility = getVolatility(df_result)
 		else:
+			# if there is no data between the date range the dataframe would be empty and thus we just return none
 			result_manufacturer = result_correlation = result_volatility = None
 		return result_top3, result_manufacturer, result_correlation, result_volatility
 
@@ -34,11 +42,13 @@ def getData(search_type, start_date, end_date):
 
 
 def getReviewCorrelation(df):
+	#Use Pandas to find Correlation between the following salesRank and number of reviews and round it to 3 decimals
 	corr_shortRank_reviewCount = "{0:.3f}".format(df['salesRankShortTerm'].corr(df['customerReviewCount']))
 	corr_medRank_reviewCount = "{0:.3f}".format(df['salesRankMediumTerm'].corr(df['customerReviewCount']))
 	corr_longRank_reviewCount = "{0:.3f}".format(df['salesRankLongTerm'].corr(df['customerReviewCount']))
 	corr_bestRank_reviewCount = "{0:.3f}".format(df['bestSellingRank'].corr(df['customerReviewCount']))
 
+	#Use Pandas to find Correlation between the following salesRank and average rating of reviews and round it to 3 decimals
 	corr_shortRank_reviewAvg = "{0:.3f}".format(df['salesRankShortTerm'].corr(df['customerReviewAverage']))
 	corr_medRank_reviewAvg = "{0:.3f}".format(df['salesRankMediumTerm'].corr(df['customerReviewAverage']))
 	corr_longRank_reviewAvg = "{0:.3f}".format(df['salesRankLongTerm'].corr(df['customerReviewCount']))
@@ -50,11 +60,15 @@ def getReviewCorrelation(df):
 
 
 def getVolatility(df):
+	#Use Pandas to get Standard Deviation(Volatility) of the each product of manufacturer
 	df_volatile = df.groupby(['sku', 'manufacturer']).std().reset_index()
 	df_volatile.sort_values(by=['manufacturer'], inplace=True)
 
+	#Use Pandas to get the average of Standard Deviation from previous result for each Brand (manufacturer)
 	df_vol_manufacturer = df_volatile.groupby(['manufacturer']).mean().round(2).reset_index()
 	df_vol_manufacturer = df_vol_manufacturer.set_index('manufacturer').transpose()
+
+	#The results may not contain the brand we are interested in benchmarking, hence include those brands in dataframe with "--" value
 	all_brands = ['LG','Samsung','Sony','Toshiba']
 	columns = df_vol_manufacturer.columns
 	missing_cols = [item for item in all_brands if item not in columns]
@@ -73,6 +87,7 @@ def getBrandPercent(df,category=None):
 	df_manufacturer.sort_values(by=['percent'],ascending=False,inplace=True)
 
 	if category == "top3":
+		# The results may not contain the brand we are interested in benchmarking, hence include those brands in dataframe with "0" value
 		all_brands = ['LG', 'Samsung', 'Sony', 'Toshiba']
 		set_brands = set(df_manufacturer['manufacturer'].tolist())
 

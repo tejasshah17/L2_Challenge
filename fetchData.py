@@ -28,8 +28,8 @@ def init():
 		print ret_status
 
 		############### -- REQUEST CURVED SMART TV DATA -- ############
-		requestData('CSTV')
-		requestData('STV')
+		print requestData('CSTV')
+		print requestData('STV')
 
 
 	except Exception as ex:
